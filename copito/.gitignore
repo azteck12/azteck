@@ -1,0 +1,3 @@
+node_modules/
+build/*_raw.wav
+build/l*.wav
