@@ -6,7 +6,7 @@ fs.mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: +w, height: +h } });
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
-await page.goto(`http://localhost:8123/index.html?w=${w}&h=${h}`);
+await page.goto(`http://localhost:8123/${process.env.PAGE || 'index.html'}?w=${w}&h=${h}`);
 await page.waitForFunction('window.READY === true', null, { timeout: 120000 });
 for (let f = +from; f < +to; f++) {
   const file = `${outDir}/f${String(f).padStart(5, '0')}.jpg`;

@@ -6,7 +6,7 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader','--enab
 const page = await browser.newPage({ viewport: { width: +w, height: +h } });
 page.on('console', m => console.log('console:', m.text()));
 page.on('pageerror', e => console.log('PAGEERROR', e.message));
-await page.goto(`http://localhost:8123/index.html?w=${w}&h=${h}`);
+await page.goto(`http://localhost:8123/${process.env.PAGE || 'index.html'}?w=${w}&h=${h}`);
 await page.waitForFunction('window.READY === true', null, { timeout: 120000 });
 for (const t of times) {
   const t0 = Date.now();

@@ -1,3 +1,6 @@
 node_modules/
 build/*_raw.wav
 build/l*.wav
+voices_models/
+build/take_*.wav
+build/ep2_l*.wav
