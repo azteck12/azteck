@@ -9,6 +9,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
 const params = new URLSearchParams(location.search);
 const W = +params.get('w') || 540, H = +params.get('h') || 960;
+// cam=x,y,z,lx,ly,lz,fov&rel=hug|star  (encuadre fijo para imágenes de marca)
+const CAM_OVERRIDE = params.get('cam') ? { p: params.get('cam').split(',').map(Number), rel: params.get('rel') } : null;
 const TL = await (await fetch('build/timeline.json')).json();
 
 // ------------------------------------------------------------------ utilidades
@@ -730,6 +732,7 @@ function cameraAt(t) {
 function update(t) {
   // --------- cámara
   const cam = cameraAt(t);
+  if (CAM_OVERRIDE) { const c = CAM_OVERRIDE; const base = c.rel === 'hug' ? HUG : c.rel === 'star' ? SP : V(0, 0, 0); cam.pos = base.clone().add(V(c.p[0], c.p[1], c.p[2])); cam.look = base.clone().add(V(c.p[3], c.p[4], c.p[5])); cam.fov = c.p[6]; }
   let shake = 0;
   if (t > 14.4 && t < 18.9) shake = sstep(14.4, 15.2, t) * (1 - sstep(17.5, 18.9, t)) * .05;
   cam.pos.x += Math.sin(t * 61) * shake; cam.pos.y += Math.sin(t * 47 + 2) * shake;
@@ -971,6 +974,21 @@ function update(t) {
     const s = .35 * easeOutBack(clamp(age / .4)) * (1 - sstep(2, 2.6, age)); h.scale.setScalar(Math.max(.001, s));
   });
 
+  if (params.get('brand')) {
+    // pose fija para imágenes del canal: de frente a cámara, sonriendo y saludando
+    sparks.visible = false;
+    if (params.get('norocket')) rocket.visible = false;
+    if (params.get('nobear')) bear.g.visible = false;
+    if (params.get('cpos')) {
+      const c = params.get('cpos').split(',').map(Number); copito.g.position.copy(SP).add(V(c[0], c[1], c[2]));
+      keySpace.position.copy(camera.position).add(V(3, 4, 2)); keySpace.target.position.copy(copito.g.position); keySpace.intensity = 2.4;
+      camFill.intensity = 0; starLight.intensity = 0;
+    }
+    const toCam = camera.position.clone().sub(copito.g.position);
+    copito.g.rotation.set(0, Math.atan2(toCam.x, toCam.z), 0);
+    poseCritter(copito, t, { blink: 1, smile: 1, oMouth: .9, blush: .9, eyeBig: 1.08, look: [0, 0], raise: -.55,
+      armR: [2.7, 0], armL: [.5, -.2], headZ: .1, earWobble: .3, legL: .2, legR: -.15 });
+  }
   drawHUD(t);
 }
 
@@ -980,7 +998,7 @@ function renderAt(t) {
   composer.render();
   renderer.autoClear = false;
   renderer.setRenderTarget(null);
-  renderer.render(hudScene, hudCam);
+  if (!params.get('nohud')) renderer.render(hudScene, hudCam);
 }
 await document.fonts.load('700 40px Fredoka');
 window.renderAt = renderAt;

@@ -37,3 +37,10 @@ Un cuadro concreto: `http://localhost:8123/index.html?t=26.5`
 - `audio/gen_audio.py`: voces, música (6 secciones según el ánimo) y efectos de sonido; mezcla con ducking bajo los diálogos
 - `tools/render.mjs`, `tools/snap.mjs`: render por cuadros con Playwright
 - `tools/assemble.sh`: une los cuadros y el audio en un MP4 4K
+
+## Imágenes del canal COPITO TV
+
+- `brand/copito_tv_perfil.png`: foto de perfil de 800×800 (el nombre queda dentro del recorte circular)
+- `brand/copito_tv_banner.jpg`: banner de 2560×1440; el texto está dentro de la zona segura de 1546×423 que se ve en todos los dispositivos
+
+Se generan con los mismos personajes 3D: `tools/still.mjs` renderiza los fondos (`brand/raw/`, parámetros `brand=1`, `cam=…`) y `tools/brand.mjs` compone los textos (`brand/compose.html`).
