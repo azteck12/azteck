@@ -79,3 +79,18 @@ Se generan con los mismos personajes 3D: `tools/still.mjs` renderiza los fondos 
 - La Estrella, el monstruo, Copito y el osito salen de `characters.js` (mismo código que los episodios anteriores).
 - Voces Piper: Copito y la Estrella con `es_AR-daniela-high` (tonos y efectos distintos), el monstruo con `es_MX-ald-medium` y el osito con `es_MX-claude-high`.
 - Audio: `python3 audio/pick_takes.py ep3` y luego `KEEP_RAW=1 python3 audio/gen_audio_ep3.py`.
+
+## Episodio 4: ¡Los dulces cobraron vida!
+
+**Video:** `output/copito_ep4_dulces_vida_4k.mp4` (y versión 1080p)
+
+| Tiempo | Escena |
+|---|---|
+| 0–4 s | Copito y el monstruo pasean por el bosque. Una voz grita *“¡Socorro! ¡Ayúdenme!”* y un caramelo gigante pasa volando: *“¡¿Pero qué fue eso?!”* |
+| 4–9 s | *“¡Una fábrica de dulces gigante!”* Las puertas se abren y salen 120 gomitas, chocolates y caramelos con ojos. Aparece el Rey Caramelo con su corona. |
+| 9–15 s | *“¡Ahora todos los dulces son míos! ¡Atrapen a ese conejo!”* Persecución entre montañas de chocolate, un río de gelatina y piruletas gigantes: *“¡Corre, corre!”* |
+| 15–22 s | Copito resbala por el río de chocolate y cae frente al rey, que llora: *“¡Nadie quiere compartir dulces conmigo!”* |
+| 22–29 s | *“¡Si compartes, tendrás muchos amigos!”* *“¡Dulces para todos!”* Explosión de colores: la fábrica se vuelve un parque con noria y globos. |
+| 29–35 s | Baile… tiembla el suelo, una sombra gigante y una voz grave: *“¿Quién despertó al dragón de chocolate?”* Copito: *“¡Ay, no! ¡Un dragón!”* — ¡Continuará! |
+
+- Voces Piper: Copito (`es_AR-daniela-high`), monstruo (`es_MX-ald-medium`), Rey Caramelo, gomita y dragón (`es_MX-claude-high` con tono y efectos distintos; el dragón lleva graves, saturación y eco).
