@@ -62,3 +62,20 @@ Se generan con los mismos personajes 3D: `tools/still.mjs` renderiza los fondos 
 - Voces neuronales Piper (`es_AR-daniela-high` para Copito, `es_MX-ald-medium` para el monstruo). Los modelos se descargan de Hugging Face (`rhasspy/piper-voices`) en `voices_models/`.
 - `audio/pick_takes_ep2.py` genera varias tomas por frase y se queda con la que Whisper transcribe mejor; luego `KEEP_RAW=1 python3 audio/gen_audio_ep2.py` hace la mezcla.
 - Render: `PAGE=ep2/index.html node tools/render.mjs frames_ep2 1080 1920 30 0 1050` y `tools/assemble.sh` con `build/ep2_soundtrack.wav`.
+
+## Episodio 3: ¡La estrella que cayó del cielo!
+
+**Video:** `output/copito_ep3_estrella_cayo_4k.mp4` (y versión 1080p)
+
+| Tiempo | Escena |
+|---|---|
+| 0–4 s | Noche de fogata en el bosque. Un meteorito cruza el cielo y ¡PUM! cae entre los árboles: *“¡Miren! ¡Algo cayó del cielo!”* |
+| 4–10 s | Corren al cráter y encuentran a la Estrella del episodio 1, pequeña y apagada: *“¡Me caí y ya no puedo volver a casa!”* |
+| 10–16 s | *“¡Tranquila, nosotros te ayudamos!”* El monstruo arcoíris: *“¡Mi mochila ahora hace arcoíris!”* y lanza un camino de arcoíris al cielo. |
+| 16–23 s | Suben todos por el arcoíris (*“¡Allá vamos!”*, dice el osito), pero en la cima la Estrella se apaga: *“¡Oh no, mi luz se está apagando!”* |
+| 23–29 s | *“¡Todos juntos, un abrazo de amigos!”* El abrazo la hace brillar y sube volando: *“¡Gracias! ¡Brillo más que nunca!”* |
+| 29–35 s | Fuegos artificiales con forma de corazón. Copito a cámara: *“¡Cuando nos ayudamos, todo es posible!”* Tarjeta final de COPITO TV. |
+
+- La Estrella, el monstruo, Copito y el osito salen de `characters.js` (mismo código que los episodios anteriores).
+- Voces Piper: Copito y la Estrella con `es_AR-daniela-high` (tonos y efectos distintos), el monstruo con `es_MX-ald-medium` y el osito con `es_MX-claude-high`.
+- Audio: `python3 audio/pick_takes.py ep3` y luego `KEEP_RAW=1 python3 audio/gen_audio_ep3.py`.

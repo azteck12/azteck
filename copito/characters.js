@@ -216,4 +216,173 @@ function starShape(Ro, Ri, round = .18) {
   sh.closePath();
   return sh;
 }
-export { clamp, lerp, sstep, easeInOut, easeOutBack, bounce, pulse, V, rand, SPH, SPHlo, phys, MAT, mesh, CAP, stick, makeCritter, poseCritter, blinkAt, starShape };
+// ------------------------------------------------------------------ estrella (episodio 1)
+function makeStar() {
+  const g = new THREE.Group();
+  const geo = new THREE.ExtrudeGeometry(starShape(1, .5, .2), { depth: .22, bevelEnabled: true, bevelThickness: .2, bevelSize: .14, bevelSegments: 10, curveSegments: 16 });
+  geo.center(); geo.computeVertexNormals();
+  const mat = new THREE.MeshPhysicalMaterial({ color: '#ffd84d', emissive: '#ffae00', emissiveIntensity: .4, roughness: .35, clearcoat: .8, clearcoatRoughness: .3, sheen: .5, sheenColor: new THREE.Color('#fff2b0') });
+  const body = new THREE.Mesh(geo, mat); g.add(body);
+  const front = .33;
+  const P = { mat, eyes: [], brows: [], tears: [] };
+  const face = new THREE.Group(); face.position.z = front; g.add(face); P.face = face;
+  for (const s of [-1, 1]) {
+    const eg = new THREE.Group(); eg.position.set(s * .2, .1, 0); face.add(eg); P.eyes.push(eg);
+    eg.add(mesh(SPH, MAT.pupil, [0, 0, 0], [.085, .12, .05]));
+    eg.add(mesh(SPH, MAT.hl, [.03, .045, .04], .03));
+    eg.add(mesh(SPH, MAT.hl, [-.025, -.04, .04], .015));
+    const br = mesh(CAP, new THREE.MeshStandardMaterial({ color: '#b86b00' }), [s * .2, .3, .02], [.016, .05, .016], [0, 0, Math.PI / 2]);
+    face.add(br); P.brows.push(br);
+  }
+  P.mouthArc = mesh(new THREE.TorusGeometry(.085, .016, 8, 28, Math.PI), MAT.mouth, [0, -.1, .02]);
+  face.add(P.mouthArc);
+  P.mouthO = mesh(SPH, MAT.mouth, [0, -.12, .01], [.06, .04, .03]); face.add(P.mouthO);
+  const blush = new THREE.MeshBasicMaterial({ color: '#ff7aa8', transparent: true, opacity: .4, depthWrite: false });
+  for (const s of [-1, 1]) { const b = new THREE.Mesh(new THREE.CircleGeometry(.07, 24), blush); b.position.set(s * .33, -.04, .02); face.add(b); }
+  P.blush = blush;
+  const tearMat = new THREE.MeshPhysicalMaterial({ color: '#8fd8ff', roughness: .05, transmission: .3, transparent: true, opacity: .9, emissive: '#3aa0ff', emissiveIntensity: .6 });
+  for (let i = 0; i < 6; i++) { const tm = mesh(SPH, tearMat, [0, 0, 0], [.03, .042, .03]); face.add(tm); P.tears.push(tm); }
+  return { g, P };
+}
+function poseStar(st, t, p) {
+  const P = st.P;
+  P.mat.emissiveIntensity = p.glow;
+  P.eyes.forEach((e) => e.scale.set(1, Math.max(.08, p.blink), 1));
+  const sad = p.sad;
+  P.brows.forEach((b, i) => { const s = i ? 1 : -1; b.rotation.z = Math.PI / 2 - s * sad * .5; b.position.y = .3 + (1 - sad) * .02; });
+  const happy = 1 - sad;
+  P.mouthArc.scale.set(1 + happy * .3, lerp(1, -1.2, happy), 1);
+  P.mouthArc.position.y = lerp(-.16, -.08, happy);
+  P.mouthO.visible = p.mouth > .03;
+  P.mouthO.scale.set(.05 + p.mouth * .02, .015 + p.mouth * .06, .03);
+  P.mouthArc.visible = !P.mouthO.visible || happy > .5;
+  P.blush.opacity = .3 + happy * .45;
+  P.tears.forEach((tm, i) => {
+    const s = i % 2 ? 1 : -1; const ph = ((t * .9 + i * .33) % 1);
+    tm.visible = sad > .3;
+    tm.position.set(s * (.25 + ph * .06), .02 - ph * .55, .03);
+    tm.scale.setScalar(.03 * (0.6 + ph * .6) * sad);
+    tm.scale.y *= 1.4;
+  });
+  st.g.rotation.z = Math.sin(t * .9) * .05 + (p.tilt || 0);
+}
+
+
+// ------------------------------------------------------------------ monstruo (episodio 2)
+const PALETTE = ['#ff5fa2', '#ffb02e', '#7bdc4a', '#2fd0c9', '#a67bff', '#ff5b5b', '#ffd23f', '#5aa8ff'];
+function makeMonster() {
+  const R = rand(77);
+  const g = new THREE.Group(); const P = { eyes: [], lids: [], arms: [], legs: [], tears: [] };
+  const root = new THREE.Group(); g.add(root); P.root = root;
+  const purple = phys('#8f4dff', { roughness: .85, sheen: 1, sheenRoughness: .4, sheenColor: new THREE.Color('#e3ccff') });
+  const lilac = phys('#c7a6ff', { roughness: .8, sheen: .6, sheenColor: new THREE.Color('#ffffff') });
+  P.purple = purple;
+  // cuerpo arcoíris (transformación): colores por vértice en franjas
+  const rbGeo = new THREE.SphereGeometry(1, 48, 32); const rc = [];
+  const pa = rbGeo.attributes.position;
+  for (let i = 0; i < pa.count; i++) { const y = pa.getY(i); const c = new THREE.Color().setHSL(((y + 1) * .42 + Math.atan2(pa.getZ(i), pa.getX(i)) * .02) % 1, .85, .62); rc.push(c.r, c.g, c.b); }
+  rbGeo.setAttribute('color', new THREE.Float32BufferAttribute(rc, 3));
+  const rbMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: .6, sheen: 1, sheenColor: new THREE.Color('#ffffff'), clearcoat: .3 });
+  for (const s of [-1, 1]) {
+    const leg = new THREE.Group(); leg.position.set(s * .22, .14, 0); root.add(leg); P.legs.push(leg);
+    leg.add(mesh(SPH, lilac, [0, -.06, .07], [.15, .1, .21]));
+  }
+  const body = new THREE.Group(); root.add(body); P.body = body;
+  P.bodyPurple = mesh(SPH, purple, [0, .58, 0], [.6, .55, .55]); body.add(P.bodyPurple);
+  P.bodyRainbow = mesh(rbGeo, rbMat, [0, .58, 0], [.6, .55, .55]); P.bodyRainbow.visible = false; body.add(P.bodyRainbow);
+  body.add(mesh(SPH, lilac, [0, .5, .3], [.38, .33, .3]));
+  const spotM = phys('#6a2fd6', { roughness: .9 });
+  P.spots = [];
+  for (const [x, y, z, s] of [[.42, .8, .2, .07], [-.45, .7, .15, .06], [.3, .35, -.35, .08], [-.2, .95, -.3, .06], [.5, .45, -.1, .05], [-.48, .4, .05, .07]]) { const sp = mesh(SPH, spotM, [x, y, z], [s, s, s * .4]); sp.lookAt(V(x * 3, (y - .58) * 3 + .58, z * 3)); body.add(sp); P.spots.push(sp); }
+  const dots = []; // lunares de colores (aparecen al transformarse)
+  for (let i = 0; i < 14; i++) {
+    const th = R() * 6.28, ph = .4 + R() * 2.2; const x = Math.sin(ph) * Math.cos(th) * .6, y = Math.cos(ph) * .55 + .58, z = Math.sin(ph) * Math.sin(th) * .55;
+    const d = mesh(SPH, phys(PALETTE[i % 8], { roughness: .3, clearcoat: 1 }), [x, y, z], [.06, .06, .025]); d.lookAt(V(x * 3, (y - .58) * 3 + .58, z * 3)); d.visible = false; body.add(d); dots.push(d);
+  }
+  P.dots = dots;
+  // cuernitos
+  for (const s of [-1, 1]) body.add(mesh(new THREE.ConeGeometry(.07, .22, 14), lilac, [s * .26, 1.12, -.02], 1, [0, 0, -s * .35]));
+  // tres ojos
+  for (const [x, y, z, r] of [[0, .9, .45, .155], [-.27, .8, .41, .12], [.27, .8, .41, .12]]) {
+    const eg = new THREE.Group(); eg.position.set(x, y, z); eg.lookAt(V(x * 2.2, y + .05, 2)); body.add(eg);
+    eg.add(mesh(SPH, MAT.sclera, [0, 0, 0], [r, r * 1.1, r * .7]));
+    const ig = new THREE.Group(); ig.position.z = r * .45; eg.add(ig);
+    ig.add(mesh(SPH, phys('#7dff4a', { roughness: .15, clearcoat: 1, emissive: '#2a8a00', emissiveIntensity: .3 }), [0, 0, 0], [r * .62, r * .66, r * .3]));
+    ig.add(mesh(SPH, MAT.pupil, [0, 0, r * .18], [r * .34, r * .38, r * .2]));
+    const h1 = new THREE.Mesh(SPH, MAT.hl); h1.position.set(r * .22, r * .26, r * .32); h1.scale.setScalar(r * .2); ig.add(h1);
+    const lid = mesh(new THREE.SphereGeometry(1, 24, 12, 0, 6.29, 0, Math.PI / 2), purple, [0, 0, 0], [r * 1.06, r * 1.16, r * .76]);
+    lid.rotation.x = -1.4; eg.add(lid);
+    P.eyes.push({ eg, ig, lid, r });
+  }
+  // boca y dientes graciosos
+  P.mouth = mesh(SPH, MAT.mouth, [0, .44, .5], [.22, .06, .07]); body.add(P.mouth);
+  P.teeth = new THREE.Group(); body.add(P.teeth);
+  const toothM = MAT.tooth;
+  P.teeth.add(mesh(new RoundedBoxGeometry(.075, .1, .03, 2, .012), toothM, [-.055, .47, .55]));
+  P.teeth.add(mesh(new RoundedBoxGeometry(.075, .1, .03, 2, .012), toothM, [.055, .47, .55]));
+  P.teeth.add(mesh(new THREE.ConeGeometry(.025, .06, 8), toothM, [.13, .4, .54], 1, [Math.PI, 0, .3]));
+  // brazos
+  for (const s of [-1, 1]) {
+    const ag = new THREE.Group(); ag.position.set(s * .52, .62, .05); body.add(ag); P.arms.push(ag);
+    ag.add(mesh(CAP, purple, [0, -.15, 0], [.075, .1, .075]));
+  }
+  body.add(mesh(SPH, lilac, [0, .3, -.52], .1));
+  // lágrimas
+  const tearMat = new THREE.MeshPhysicalMaterial({ color: '#8fd8ff', roughness: .05, transparent: true, opacity: .9, emissive: '#3aa0ff', emissiveIntensity: .5 });
+  for (let i = 0; i < 9; i++) { const tm = mesh(SPH, tearMat, [0, 0, 0], .03); body.add(tm); P.tears.push(tm); }
+  // mochila gigante aspiradora
+  const pack = new THREE.Group(); pack.position.set(0, .75, -.5); body.add(pack); P.pack = pack;
+  const metal = phys('#5fc2c7', { roughness: .35, metalness: .4, clearcoat: .8 });
+  pack.add(mesh(new RoundedBoxGeometry(1.0, 1.15, .65, 5, .18), metal, [0, .25, -.15]));
+  pack.add(mesh(new RoundedBoxGeometry(.7, .3, .1, 3, .05), phys('#ffd23f', { roughness: .3, clearcoat: 1 }), [0, .02, .2]));
+  for (const s of [-1, 1]) body.add(stick(V(s * .3, .98, .28), V(s * .32, 1.0, -.45), .04, phys('#ff7a3d')));
+  const jarGlass = new THREE.MeshPhysicalMaterial({ color: '#ffffff', transparent: true, opacity: .25, roughness: .05, clearcoat: 1 });
+  pack.add(mesh(new THREE.CylinderGeometry(.33, .33, .55, 28, 1, true), jarGlass, [0, 1.12, -.15]));
+  pack.add(mesh(new THREE.TorusGeometry(.33, .04, 10, 28), metal, [0, 1.4, -.15], 1, [Math.PI / 2, 0, 0]));
+  P.swirlMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uFill: { value: .3 } },
+    vertexShader: `varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `varying vec3 vP; uniform float uTime,uFill; vec3 hue(float h){ return clamp(abs(mod(h*6.+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.); }
+      void main(){ float a=atan(vP.z,vP.x); float h=vP.y*1.5+a/6.2832+uTime*.4; if(vP.y>uFill-.25) discard; gl_FragColor=vec4(hue(h)*1.6,1.); }`,
+  });
+  P.swirl = mesh(new THREE.CylinderGeometry(.29, .29, .5, 28), P.swirlMat, [0, 1.12, -.15]); pack.add(P.swirl);
+  const curve = new THREE.CatmullRomCurve3([V(.35, .7, -.1), V(.6, 1.05, .1), V(.6, .95, .55), V(.42, .7, .85)]);
+  pack.add(mesh(new THREE.TubeGeometry(curve, 40, .06, 10), phys('#ff7a3d', { roughness: .5 })));
+  P.funnel = new THREE.Group(); P.funnel.position.set(.42, .7, .85); pack.add(P.funnel);
+  P.funnel.add(mesh(new THREE.CylinderGeometry(.2, .07, .3, 20, 1, true), phys('#ffd23f', { side: THREE.DoubleSide, roughness: .3, metalness: .3 }), [0, 0, .12], 1, [Math.PI / 2, 0, 0]));
+  P.bulbs = [];
+  for (let i = 0; i < 3; i++) { const b = mesh(SPH, new THREE.MeshStandardMaterial({ color: PALETTE[i * 2], emissive: PALETTE[i * 2], emissiveIntensity: 2 }), [-.25 + i * .25, .55, .19], .04); pack.add(b); P.bulbs.push(b); }
+  g.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+  return { g, P };
+}
+function poseMonster(mo, t, p) {
+  const P = mo.P;
+  const br = Math.sin(t * 2.6) * .02;
+  P.root.scale.set(1 + (p.squash || 0) * .15, 1 - (p.squash || 0) * .2 + br, 1 + (p.squash || 0) * .15);
+  P.body.rotation.set(p.bodyX || 0, p.bodyY || 0, p.bodyZ || 0);
+  const [al, ar] = [p.armL || [0, 0], p.armR || [0, 0]];
+  P.arms[0].rotation.set(al[1], 0, -.5 - al[0]); P.arms[1].rotation.set(ar[1], 0, .5 + ar[0]);
+  P.legs[0].rotation.x = p.legL || 0; P.legs[1].rotation.x = p.legR || 0;
+  const [lx, ly] = p.look || [0, 0];
+  P.eyes.forEach((e, i) => {
+    e.ig.position.x = lx * e.r * .25; e.ig.position.y = ly * e.r * .25;
+    const bl = Math.min(p.blink ?? 1, i === 0 ? 1 : (p.blinkSide ?? 1));
+    // párpado: baja con el parpadeo y con la tristeza (inclinado)
+    e.lid.rotation.x = lerp(-1.75, -.05, 1 - bl) + (p.sad || 0) * .55;
+    e.lid.rotation.z = (i === 1 ? -1 : i === 2 ? 1 : 0) * (p.sad || 0) * .5;
+    e.eg.scale.setScalar(1 + (p.eyeBig || 0) * .25);
+  });
+  const m = Math.max(p.mouth || 0, p.oMouth || 0);
+  P.mouth.scale.set(.2 + m * .03 - (p.sad || 0) * .04, .03 + m * .12, .07);
+  P.mouth.position.y = .44 - (p.sad || 0) * .02;
+  P.tears.forEach((tm, i) => {
+    const e = P.eyes[i % 3]; const ph = ((t * 1.1 + i * .37) % 1);
+    tm.visible = (p.cry || 0) > .2;
+    const side = i % 3 === 0 ? (i % 2 ? .08 : -.08) : (i % 3 === 1 ? -.1 : .1);
+    tm.position.set(e.eg.position.x + side, e.eg.position.y - e.r - ph * .5, e.eg.position.z + .08 - ph * .02);
+    tm.scale.set(.028 * (p.cry || 0), .04 * (p.cry || 0), .028 * (p.cry || 0));
+  });
+}
+
+
+export { clamp, lerp, sstep, easeInOut, easeOutBack, bounce, pulse, V, rand, SPH, SPHlo, phys, MAT, mesh, CAP, stick, makeCritter, poseCritter, blinkAt, starShape, makeStar, poseStar, makeMonster, poseMonster, PALETTE };

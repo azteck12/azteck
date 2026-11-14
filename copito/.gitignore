@@ -4,3 +4,4 @@ build/l*.wav
 voices_models/
 build/take_*.wav
 build/ep2_l*.wav
+build/ep3_l*.wav
