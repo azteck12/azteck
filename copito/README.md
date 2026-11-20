@@ -94,3 +94,16 @@ Se generan con los mismos personajes 3D: `tools/still.mjs` renderiza los fondos 
 | 29–35 s | Baile… tiembla el suelo, una sombra gigante y una voz grave: *“¿Quién despertó al dragón de chocolate?”* Copito: *“¡Ay, no! ¡Un dragón!”* — ¡Continuará! |
 
 - Voces Piper: Copito (`es_AR-daniela-high`), monstruo (`es_MX-ald-medium`), Rey Caramelo, gomita y dragón (`es_MX-claude-high` con tono y efectos distintos; el dragón lleva graves, saturación y eco).
+
+## Episodio 5: ¡El dragón con dolor de muela!
+
+**Video:** `output/copito_ep5_dragon_muela_4k.mp4` (y versión 1080p)
+
+| Tiempo | Escena |
+|---|---|
+| 0–4 s | Continúa el final del episodio 4: el dragón de chocolate ruge sobre la fábrica (*“¡Grrr! ¿Quién hizo tanto ruido?”*), salta a la plaza y todos huyen: *“¡A correr, rápido!”* |
+| 4–10 s | Escondidos tras una barra de chocolate gigante. El dragón pisotea, ruge… y de pronto: *“¡Ay, ay, ay! ¡Mi muela!”* |
+| 10–16 s | *“¡Le duele una muela!”* El rey, avergonzado: *“¡Se comió todos los dulces!”* Copito sale valiente. |
+| 16–23 s | *“¡Dragón, abre la boca!”* El monstruo trae un cepillo gigante (*“¡Aquí está el cepillo!”*) y le cepillan los dientes entre burbujas. |
+| 23–29 s | ¡Ding! La muela queda blanca y brillante: *“¡Ya no me duele! ¡Gracias, amigos!”* Copito: *“¡Después de los dulces, a cepillarse los dientes!”* |
+| 29–35 s | El dragón los lleva volando sobre el mundo de dulces. Copito, de pie sobre su cabeza: *“¿Y tú, te lavaste los dientes hoy?”* Tarjeta de COPITO TV. |
